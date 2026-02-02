@@ -50,7 +50,41 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(5)
+		c.Set("a", 10)
+		c.Set("b", 20)
+		c.Clear()
+
+		a, ok := c.Get("a")
+		require.Nil(t, a)
+		require.Equal(t, false, ok)
+
+		b, ok := c.Get("b")
+		require.Nil(t, b)
+		require.Equal(t, false, ok)
+	})
+
+	t.Run("should not add item if capacity is zero", func(t *testing.T) {
+		c := NewCache(0)
+		c.Set("a", 10)
+
+		val, ok := c.Get("a")
+		require.Nil(t, val)
+		require.False(t, ok)
+	})
+
+	t.Run("should remove last used item", func(t *testing.T) {
+		c := NewCache(1)
+		c.Set("a", 10)
+		c.Set("b", 20)
+
+		val, ok := c.Get("a")
+		require.Nil(t, val)
+		require.False(t, ok)
+
+		val, ok = c.Get("b")
+		require.Equal(t, 20, val)
+		require.True(t, ok)
 	})
 }
 
