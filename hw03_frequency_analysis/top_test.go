@@ -48,6 +48,18 @@ func TestTop10(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	t.Run("no words in space only string", func(t *testing.T) {
+		require.Len(t, Top10("   "), 0)
+	})
+
+	t.Run("strips empty spaces at the edges", func(t *testing.T) {
+		require.Equal(t, []string{"ℹ️⛔️💼"}, Top10("  ℹ️⛔️💼  "))
+	})
+
+	t.Run("correctly applies lexicographical sort", func(t *testing.T) {
+		require.Equal(t, []string{"b", "c", "z"}, Top10("z z z b b b c c c"))
+	})
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
