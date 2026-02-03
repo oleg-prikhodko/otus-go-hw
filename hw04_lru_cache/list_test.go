@@ -115,14 +115,21 @@ func TestList(t *testing.T) {
 		require.Equal(t, 0, l.Len())
 	})
 
-	t.Run("moves item to front from the back", func(t *testing.T) {
+	t.Run("correctly moves same element multiple times", func(t *testing.T) {
 		l := NewList()
-		l.PushBack(10)
+		b := l.PushBack(10)
 		i := l.PushBack(20)
 		l.MoveToFront(i)
+		l.MoveToFront(i)
+		l.MoveToFront(i)
 
-		require.Equal(t, 20, l.Front().Value)
-		require.Equal(t, 10, l.Back().Value)
+		require.Equal(t, i, l.Front())
+		require.Equal(t, b, l.Back())
+		require.Equal(t, 2, l.Len())
+		require.Nil(t, i.Prev)
+		require.Equal(t, b, i.Next)
+		require.Nil(t, b.Next)
+		require.Equal(t, i, b.Prev)
 	})
 
 	t.Run("complex", func(t *testing.T) {
