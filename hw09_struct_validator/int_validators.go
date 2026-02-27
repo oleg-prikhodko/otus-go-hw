@@ -14,40 +14,41 @@ var (
 	ErrValueNotInSet      = errors.New("value is not in the set")
 )
 
-type IntRule int
-
-const (
-	Min IntRule = iota
-	Max
-	IntIn
-)
-
-type IntValidationRule struct {
-	ruleType IntRule
-	val      any
+type MinValidator struct {
+	threshold int64
 }
 
-func (r IntValidationRule) Validate(val int64) error {
-	switch r.ruleType {
-	case Min:
-		if val < r.val.(int64) {
-			return ErrValueTooLow
-		}
-	case Max:
-		if val > r.val.(int64) {
-			return ErrValueTooHigh
-		}
-	case IntIn:
-		if !slices.Contains(r.val.([]int64), val) {
-			return ErrValueNotInSet
-		}
+func (v MinValidator) Validate(val int64) error {
+	if val < v.threshold {
+		return ErrValueTooLow
 	}
+	return nil
+}
 
+type MaxValidator struct {
+	threshold int64
+}
+
+func (v MaxValidator) Validate(val int64) error {
+	if val > v.threshold {
+		return ErrValueTooHigh
+	}
+	return nil
+}
+
+type IntInValidator struct {
+	allowed []int64
+}
+
+func (v IntInValidator) Validate(val int64) error {
+	if !slices.Contains(v.allowed, val) {
+		return ErrValueNotInSet
+	}
 	return nil
 }
 
 func parseIntValidator(ruleType, ruleValue string) (Validator[int64], error) {
-	var rule IntValidationRule
+	var rule Validator[int64]
 	var err error
 
 	switch ruleType {
@@ -68,31 +69,31 @@ func parseIntValidator(ruleType, ruleValue string) (Validator[int64], error) {
 	return rule, nil
 }
 
-func parseMinRule(raw string) (IntValidationRule, error) {
+func parseMinRule(raw string) (Validator[int64], error) {
 	v, err := strconv.Atoi(raw)
 	if err != nil {
-		return IntValidationRule{}, err
+		return nil, err
 	}
 
-	return IntValidationRule{Min, int64(v)}, nil
+	return MinValidator{int64(v)}, nil
 }
 
-func parseMaxRule(raw string) (IntValidationRule, error) {
+func parseMaxRule(raw string) (Validator[int64], error) {
 	v, err := strconv.Atoi(raw)
 	if err != nil {
-		return IntValidationRule{}, err
+		return nil, err
 	}
 
-	return IntValidationRule{Max, int64(v)}, nil
+	return MaxValidator{int64(v)}, nil
 }
 
-func parseIntInRule(raw string) (IntValidationRule, error) {
+func parseIntInRule(raw string) (Validator[int64], error) {
 	v, err := parseCommaSepInts(raw)
 	if err != nil {
-		return IntValidationRule{}, err
+		return nil, err
 	}
 
-	return IntValidationRule{IntIn, v}, nil
+	return IntInValidator{v}, nil
 }
 
 func parseCommaSepInts(raw string) ([]int64, error) {

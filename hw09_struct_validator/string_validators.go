@@ -14,40 +14,41 @@ var (
 	ErrValueNotCompatible    = errors.New("value is not compatible with regexp")
 )
 
-type StringRule int
-
-const (
-	Len StringRule = iota
-	Regexp
-	StringIn
-)
-
-type StringValidationRule struct {
-	ruleType StringRule
-	val      any
+type LenValidator struct {
+	length int
 }
 
-func (r StringValidationRule) Validate(val string) error {
-	switch r.ruleType {
-	case Len:
-		if len(val) != r.val.(int) {
-			return ErrValueLength
-		}
-	case Regexp:
-		if match := r.val.(*regexp.Regexp).MatchString(val); !match {
-			return ErrValueNotCompatible
-		}
-	case StringIn:
-		if !slices.Contains(r.val.([]string), val) {
-			return ErrValueNotInSet
-		}
+func (v LenValidator) Validate(val string) error {
+	if len(val) != v.length {
+		return ErrValueLength
 	}
+	return nil
+}
 
+type RegexpValidator struct {
+	regexp *regexp.Regexp
+}
+
+func (v RegexpValidator) Validate(val string) error {
+	if match := v.regexp.MatchString(val); !match {
+		return ErrValueNotCompatible
+	}
+	return nil
+}
+
+type StringInValidator struct {
+	allowed []string
+}
+
+func (v StringInValidator) Validate(val string) error {
+	if !slices.Contains(v.allowed, val) {
+		return ErrValueNotInSet
+	}
 	return nil
 }
 
 func parseStringValidator(ruleType, ruleValue string) (Validator[string], error) {
-	var rule StringValidationRule
+	var rule Validator[string]
 	var err error
 
 	switch ruleType {
@@ -68,26 +69,26 @@ func parseStringValidator(ruleType, ruleValue string) (Validator[string], error)
 	return rule, nil
 }
 
-func parseLenRule(raw string) (StringValidationRule, error) {
+func parseLenRule(raw string) (Validator[string], error) {
 	v, err := strconv.Atoi(raw)
 	if err != nil {
-		return StringValidationRule{}, err
+		return nil, err
 	}
 
-	return StringValidationRule{Len, v}, nil
+	return LenValidator{v}, nil
 }
 
-func parseRegexpRule(raw string) (StringValidationRule, error) {
+func parseRegexpRule(raw string) (Validator[string], error) {
 	v, err := regexp.Compile(raw)
 	if err != nil {
-		return StringValidationRule{}, err
+		return nil, err
 	}
 
-	return StringValidationRule{Regexp, v}, nil
+	return RegexpValidator{v}, nil
 }
 
-func parseStringInRule(raw string) StringValidationRule {
+func parseStringInRule(raw string) Validator[string] {
 	v := strings.Split(raw, ",")
 
-	return StringValidationRule{StringIn, v}
+	return StringInValidator{v}
 }
