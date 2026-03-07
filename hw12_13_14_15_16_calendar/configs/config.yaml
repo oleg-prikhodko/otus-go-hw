@@ -1,5 +1,5 @@
-[logger]
-level = "INFO"
+logger:
+  level: "INFO"
 
-# TODO
-# ...
+server:
+  addr: "localhost:8080"
