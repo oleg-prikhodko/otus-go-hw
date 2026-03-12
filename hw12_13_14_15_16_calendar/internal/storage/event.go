@@ -1,20 +1,23 @@
 package storage
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Event struct {
-	ID           string
-	Title        string
-	Time         time.Time
-	Duration     time.Duration
-	Description  *string
-	OwnerID      string
-	NotifyBefore *time.Duration
+	ID           string         `db:"id"`
+	Title        string         `db:"title"`
+	Time         time.Time      `db:"event_time"`
+	Duration     time.Duration  `db:"duration"`
+	Description  *string        `db:"description"`
+	OwnerID      string         `db:"owner_id"`
+	NotifyBefore *time.Duration `db:"notify_before"`
 }
 
 type EventRepository interface {
-	Create(ev *Event) (*Event, error)
-	Update(id string, ev *Event) (*Event, error)
-	Delete(id string) (*Event, error)
-	List(from time.Time, to time.Time) ([]*Event, error)
+	Create(ctx context.Context, ev *Event) error
+	Update(ctx context.Context, id string, ev *Event) error
+	Delete(ctx context.Context, id string) error
+	List(ctx context.Context, from time.Time, to time.Time) ([]*Event, error)
 }
