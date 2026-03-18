@@ -51,9 +51,8 @@ func (s *Storage) Create(ev storage.Event) error {
 	}
 
 	query := `
-		INSERT INTO events (title, event_time, duration, description, owner_id, notify_before)
-		VALUES (:title, :event_time, :duration, :description, :owner_id, :notify_before)
-		RETURNING id;`
+		INSERT INTO events (id, title, event_time, duration, description, owner_id, notify_before)
+		VALUES (:id, :title, :event_time, :duration, :description, :owner_id, :notify_before)`
 
 	_, err := s.db.NamedExec(query, ev)
 	if err != nil {
@@ -70,9 +69,8 @@ func (s *Storage) Update(ev storage.Event) error {
 
 	query := `
 		UPDATE events
-		SET title = $1, event_time = $2, duration = $3, description = $4, owner_id = $5, notify_before = $6
-		WHERE id = $7
-		RETURNING *;`
+		SET title = :title, event_time = :event_time, duration = :duration, description = :description, owner_id = :owner_id, notify_before = :notify_before
+		WHERE id = :id`
 
 	res, err := s.db.NamedExec(query, ev)
 	if err != nil {

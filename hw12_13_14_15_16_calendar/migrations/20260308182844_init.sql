@@ -1,6 +1,6 @@
 -- +goose Up
 create table if not exists events (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id            UUID PRIMARY KEY,
     title         TEXT NOT NULL,
     event_time    TIMESTAMPTZ NOT NULL,
     duration      BIGINT NOT NULL,
