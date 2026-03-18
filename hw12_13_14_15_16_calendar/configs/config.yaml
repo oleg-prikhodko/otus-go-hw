@@ -3,3 +3,6 @@ logger:
 
 server:
   addr: "localhost:8080"
+
+storage:
+  type: "MEMORY"

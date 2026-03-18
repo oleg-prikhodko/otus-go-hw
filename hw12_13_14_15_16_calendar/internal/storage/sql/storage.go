@@ -1,14 +1,13 @@
 package sqlstorage
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	internalhttp "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -16,20 +15,21 @@ var ErrNotConnected = errors.New("database not connected")
 
 type Storage struct {
 	db     *sqlx.DB
-	logger internalhttp.Logger
+	logger common.Logger
+	addr   string
 }
 
-func New(logger internalhttp.Logger) *Storage {
-	return &Storage{logger: logger}
+func New(logger common.Logger, addr string) *Storage {
+	return &Storage{logger: logger, addr: addr}
 }
 
-func (s *Storage) Connect(ctx context.Context, connStr string) error {
-	db, err := sqlx.ConnectContext(ctx, "postgres", connStr)
+func (s *Storage) Connect() error {
+	db, err := sqlx.Connect("postgres", s.addr)
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	if err := db.PingContext(ctx); err != nil {
+	if err := db.Ping(); err != nil {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
@@ -37,7 +37,7 @@ func (s *Storage) Connect(ctx context.Context, connStr string) error {
 	return nil
 }
 
-func (s *Storage) Close(ctx context.Context) error {
+func (s *Storage) Close() error {
 	if s.db == nil {
 		return nil
 	}
@@ -45,9 +45,7 @@ func (s *Storage) Close(ctx context.Context) error {
 	return s.db.Close()
 }
 
-// repository impl
-
-func (s *Storage) Create(ctx context.Context, ev *storage.Event) error {
+func (s *Storage) Create(ev storage.Event) error {
 	if s.db == nil {
 		return ErrNotConnected
 	}
@@ -57,13 +55,7 @@ func (s *Storage) Create(ctx context.Context, ev *storage.Event) error {
 		VALUES (:title, :event_time, :duration, :description, :owner_id, :notify_before)
 		RETURNING id;`
 
-	stmt, err := s.db.PrepareNamedContext(ctx, query)
-	if err != nil {
-		return fmt.Errorf("failed to prepare statement: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.GetContext(ctx, &ev.ID, ev)
+	_, err := s.db.NamedExec(query, ev)
 	if err != nil {
 		return fmt.Errorf("failed to create event: %w", err)
 	}
@@ -71,7 +63,7 @@ func (s *Storage) Create(ctx context.Context, ev *storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Update(ctx context.Context, id string, ev *storage.Event) error {
+func (s *Storage) Update(ev storage.Event) error {
 	if s.db == nil {
 		return ErrNotConnected
 	}
@@ -82,32 +74,42 @@ func (s *Storage) Update(ctx context.Context, id string, ev *storage.Event) erro
 		WHERE id = $7
 		RETURNING *;`
 
-	var updated storage.Event
-	err := s.db.GetContext(ctx, &updated, query,
-		ev.Title, ev.Time, ev.Duration, ev.Description, ev.OwnerID, ev.NotifyBefore, id)
-
+	res, err := s.db.NamedExec(query, ev)
 	if err != nil {
-		return fmt.Errorf("failed to update event %s: %w", id, err)
+		return fmt.Errorf("failed to update event: %w", err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to update event: %w", err)
+	}
+	if affected == 0 {
+		return common.NotFoundErr
 	}
 
 	return nil
 }
 
-func (s *Storage) Delete(ctx context.Context, id string) error {
+func (s *Storage) Delete(id string) error {
 	if s.db == nil {
 		return ErrNotConnected
 	}
 
-	q := `DELETE FROM events WHERE id = $1;`
-	_, err := s.db.ExecContext(ctx, q, id)
+	res, err := s.db.Exec("DELETE FROM events WHERE id = $1;", id)
 	if err != nil {
 		return fmt.Errorf("failed to delete event %s: %w", id, err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to delete event %s: %w", id, err)
+	}
+	if affected == 0 {
+		return common.NotFoundErr
 	}
 
 	return nil
 }
 
-func (s *Storage) List(ctx context.Context, from, to time.Time) ([]*storage.Event, error) {
+func (s *Storage) List(from, to time.Time) ([]storage.Event, error) {
 	if s.db == nil {
 		return nil, ErrNotConnected
 	}
@@ -117,8 +119,8 @@ func (s *Storage) List(ctx context.Context, from, to time.Time) ([]*storage.Even
 		FROM events
 		WHERE event_time >= $1 AND event_time <= $2;`
 
-	events := make([]*storage.Event, 0)
-	err := s.db.SelectContext(ctx, &events, query, from, to)
+	events := make([]storage.Event, 0)
+	err := s.db.Select(&events, query, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list events: %w", err)
 	}

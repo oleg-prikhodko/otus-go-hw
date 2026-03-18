@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"context"
+	"io"
 	"time"
 )
 
@@ -16,8 +16,9 @@ type Event struct {
 }
 
 type EventStorage interface {
-	Create(ctx context.Context, ev *Event) error
-	Update(ctx context.Context, id string, ev *Event) error
-	Delete(ctx context.Context, id string) error
-	List(ctx context.Context, from time.Time, to time.Time) ([]*Event, error)
+	io.Closer
+	Create(ev Event) error
+	Update(ev Event) error
+	Delete(id string) error
+	List(from time.Time, to time.Time) ([]Event, error)
 }

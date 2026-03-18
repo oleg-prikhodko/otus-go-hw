@@ -11,7 +11,9 @@ import (
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"
+	eventstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	memorystorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -31,7 +33,22 @@ func main() {
 	config := NewConfig(configFile)
 	logg := logger.New(config.Logger.Level)
 
-	storage := memorystorage.New()
+	var storage eventstorage.EventStorage
+	switch config.Storage.Type {
+	case Memory:
+		storage = memorystorage.New()
+	case SQL:
+		s := sqlstorage.New(logg, config.Storage.Addr)
+		if err := s.Connect(); err != nil {
+			logg.Error("failed to connect to db: " + err.Error())
+			os.Exit(1)
+		}
+	default:
+		logg.Error("unknown storage type: " + string(config.Storage.Type))
+		os.Exit(1)
+	}
+	defer storage.Close()
+
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(logg, calendar, config.Server.Addr)

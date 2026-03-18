@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Logger LoggerConf
-	Server ServerConf
+	Logger  LoggerConf
+	Server  ServerConf
+	Storage StorageConf
 }
 
 type LoggerConf struct {
@@ -18,6 +19,18 @@ type LoggerConf struct {
 
 type ServerConf struct {
 	Addr string `yaml:"addr"`
+}
+
+type StorageType string
+
+const (
+	Memory StorageType = "MEMORY"
+	SQL    StorageType = "SQL"
+)
+
+type StorageConf struct {
+	Type StorageType `yaml:"type"`
+	Addr string      `yaml:"addr"`
 }
 
 func NewConfig(configFile string) Config {
