@@ -15,7 +15,7 @@ type Event struct {
 	NotifyBefore *time.Duration `db:"notify_before"`
 }
 
-type EventRepository interface {
+type EventStorage interface {
 	Create(ctx context.Context, ev *Event) error
 	Update(ctx context.Context, id string, ev *Event) error
 	Delete(ctx context.Context, id string) error

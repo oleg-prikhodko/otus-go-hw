@@ -5,23 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
 )
 
 type Server struct {
 	server *http.Server
-	app    Application
-	logger Logger
+	app    common.Application
+	logger common.Logger
 }
 
-type Logger interface {
-	Info(msg string)
-	Error(msg string)
-}
-
-type Application interface { // TODO
-}
-
-func NewServer(logger Logger, app Application, addr string) *Server {
+func NewServer(logger common.Logger, app common.Application, addr string) *Server {
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("hello world"))
