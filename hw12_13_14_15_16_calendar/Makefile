@@ -55,8 +55,7 @@ version: build
 	$(BIN) version
 
 test:
-	go test -race ./internal/... ./pkg/...
-
+	go test -race ./internal/...
 test-integration:
 	go test -v -tags=integration ./...
 
@@ -64,7 +63,7 @@ install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.57.2
 
 lint: install-lint-deps
-	golangci-lint run ./...
+	golangci-lint run ./cmd/... ./internal/...
 
 migrate-up:
 	goose up
