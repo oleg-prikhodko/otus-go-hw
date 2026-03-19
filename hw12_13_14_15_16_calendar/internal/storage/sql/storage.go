@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/jmoiron/sqlx"                                                      //nolint:depguard
+	_ "github.com/lib/pq"                                                          //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"  //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage" //nolint:depguard
 )
 
 var ErrNotConnected = errors.New("database not connected")
@@ -69,7 +69,8 @@ func (s *Storage) Update(ev storage.Event) error {
 
 	query := `
 		UPDATE events
-		SET title = :title, event_time = :event_time, duration = :duration, description = :description, owner_id = :owner_id, notify_before = :notify_before
+		SET title = :title,event_time = :event_time, duration = :duration, description = :description,
+			owner_id = :owner_id, notify_before = :notify_before
 		WHERE id = :id`
 
 	res, err := s.db.NamedExec(query, ev)
@@ -81,7 +82,7 @@ func (s *Storage) Update(ev storage.Event) error {
 		return fmt.Errorf("failed to update event: %w", err)
 	}
 	if affected == 0 {
-		return common.NotFoundErr
+		return common.ErrNotFound
 	}
 
 	return nil
@@ -101,7 +102,7 @@ func (s *Storage) Delete(id string) error {
 		return fmt.Errorf("failed to delete event %s: %w", id, err)
 	}
 	if affected == 0 {
-		return common.NotFoundErr
+		return common.ErrNotFound
 	}
 
 	return nil

@@ -2,4 +2,4 @@ package common
 
 import "errors"
 
-var NotFoundErr = errors.New("event not found")
+var ErrNotFound = errors.New("event not found")

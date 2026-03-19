@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"  //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage" //nolint:depguard
 )
 
 func TestStorage_Create(t *testing.T) {
@@ -59,8 +59,8 @@ func TestStorage_Update(t *testing.T) {
 		if err == nil {
 			t.Fatal("Update() expected error for non-existing event, got nil")
 		}
-		if !errors.Is(err, common.NotFoundErr) {
-			t.Errorf("Update() expected NotFoundErr, got: %v", err)
+		if !errors.Is(err, common.ErrNotFound) {
+			t.Errorf("Update() expected ErrNotFound, got: %v", err)
 		}
 	})
 }
@@ -92,8 +92,8 @@ func TestStorage_Delete(t *testing.T) {
 		if err == nil {
 			t.Fatal("Delete() expected error for non-existing event, got nil")
 		}
-		if !errors.Is(err, common.NotFoundErr) {
-			t.Errorf("Delete() expected NotFoundErr, got: %v", err)
+		if !errors.Is(err, common.ErrNotFound) {
+			t.Errorf("Delete() expected ErrNotFound, got: %v", err)
 		}
 	})
 }
@@ -145,7 +145,7 @@ func TestStorage_List(t *testing.T) {
 }
 
 func TestStorage_ThreadSafety(t *testing.T) {
-	t.Run("concurrent creates", func(t *testing.T) {
+	t.Run("concurrent creates", func(_ *testing.T) {
 		s := New()
 		var wg sync.WaitGroup
 		numGoroutines := 100

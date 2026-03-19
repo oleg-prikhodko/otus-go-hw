@@ -134,8 +134,8 @@ func TestSqlStorage_Update(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error for non-existent ID")
 		}
-		if !errors.Is(err, common.NotFoundErr) {
-			t.Errorf("expected common.NotFoundErr, got %v", err)
+		if !errors.Is(err, common.ErrNotFound) {
+			t.Errorf("expected common.ErrNotFound, got %v", err)
 		}
 	})
 }

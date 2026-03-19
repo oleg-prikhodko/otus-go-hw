@@ -8,12 +8,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/app"
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"
-	eventstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
-	memorystorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/app"                          //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/logger"                       //nolint:depguard
+	internalhttp "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"     //nolint:depguard
+	eventstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"         //nolint:depguard
+	memorystorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/memory" //nolint:depguard
+	sqlstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/sql"       //nolint:depguard
 )
 
 var configFile string

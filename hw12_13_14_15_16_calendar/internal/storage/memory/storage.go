@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"  //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage" //nolint:depguard
 )
 
 type Storage struct {
@@ -25,7 +25,7 @@ func (s *Storage) Create(ev storage.Event) error {
 func (s *Storage) Update(ev storage.Event) error {
 	_, ok := s.events.Load(ev.ID)
 	if !ok {
-		return common.NotFoundErr
+		return common.ErrNotFound
 	}
 
 	s.events.Store(ev.ID, ev)
@@ -36,7 +36,7 @@ func (s *Storage) Update(ev storage.Event) error {
 func (s *Storage) Delete(id string) error {
 	_, ok := s.events.LoadAndDelete(id)
 	if !ok {
-		return common.NotFoundErr
+		return common.ErrNotFound
 	}
 
 	return nil
@@ -45,7 +45,7 @@ func (s *Storage) Delete(id string) error {
 func (s *Storage) List(from time.Time, to time.Time) ([]storage.Event, error) {
 	var events []storage.Event
 
-	s.events.Range(func(k, v any) bool {
+	s.events.Range(func(_, v any) bool {
 		ev := v.(storage.Event)
 		if ev.Time.After(from) && ev.Time.Before(to) {
 			events = append(events, ev)

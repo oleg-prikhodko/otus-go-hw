@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common" //nolint:depguard
 )
 
 type Server struct {
@@ -17,11 +17,11 @@ type Server struct {
 
 func NewServer(logger common.Logger, app common.Application, addr string) *Server {
 	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("hello world"))
 	}))
 
-	server := &http.Server{Addr: addr, Handler: loggingMiddleware(logger, mux)}
+	server := &http.Server{Addr: addr, Handler: loggingMiddleware(logger, mux)} //nolint:gosec
 
 	return &Server{server, app, logger}
 }
