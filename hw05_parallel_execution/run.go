@@ -42,7 +42,6 @@ func Run(tasks []Task, n, m int) error {
 				default:
 				}
 
-
 				taskMutex.Lock()
 				if curTaskIdx >= len(tasks) {
 					taskMutex.Unlock()
