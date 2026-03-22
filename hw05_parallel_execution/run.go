@@ -42,11 +42,12 @@ func Run(tasks []Task, n, m int) error {
 				default:
 				}
 
-				if curTaskIdx >= len(tasks) {
-					return
-				}
 
 				taskMutex.Lock()
+				if curTaskIdx >= len(tasks) {
+					taskMutex.Unlock()
+					return
+				}
 				task := tasks[curTaskIdx]
 				curTaskIdx++
 				taskMutex.Unlock()
