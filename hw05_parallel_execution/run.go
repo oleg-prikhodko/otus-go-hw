@@ -20,13 +20,15 @@ func Run(tasks []Task, n, m int) error {
 		return ErrErrorsLimitExceeded
 	}
 
-	tasksChan := make(chan Task, len(tasks))
 	quitChan := make(chan struct{})
 	closer := func() { close(quitChan) }
 	var once sync.Once
 	var errCount int
 	var errMutex sync.Mutex
 	var wg sync.WaitGroup
+
+	var taskMutex sync.Mutex
+	var curTaskIdx int
 
 	wg.Add(n)
 	for i := 0; i < n; i++ {
@@ -40,10 +42,16 @@ func Run(tasks []Task, n, m int) error {
 				default:
 				}
 
-				task, moreTasks := <-tasksChan
-				if !moreTasks {
+
+				if curTaskIdx >= len(tasks) {
 					return
 				}
+
+				taskMutex.Lock()
+				task := tasks[curTaskIdx]
+				curTaskIdx++
+				taskMutex.Unlock()
+
 				if err := task(); err != nil {
 					errMutex.Lock()
 					if errCount++; errCount >= m {
@@ -54,11 +62,6 @@ func Run(tasks []Task, n, m int) error {
 			}
 		}()
 	}
-
-	for i := 0; i < len(tasks); i++ {
-		tasksChan <- tasks[i]
-	}
-	close(tasksChan)
 
 	wg.Wait()
 
