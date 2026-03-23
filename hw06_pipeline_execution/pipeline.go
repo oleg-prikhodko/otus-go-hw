@@ -15,16 +15,22 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	return in
 }
 
+//nolint:gocognit
 func wrap(stage Stage, done In) Stage {
 	return func(in In) Out {
-		proxy := make(Bi)
+		proxyIn := make(Bi)
+		proxyOut := make(Bi)
+		stageOut := stage(proxyIn)
 
+		// inner chan consumer
 		go func() {
-			defer close(proxy)
+			defer func() {
+				close(proxyIn)
+				drain(in)
+			}()
 			for {
 				select {
 				case <-done:
-					drain(in)
 					return
 				case val, ok := <-in:
 					if !ok {
@@ -32,15 +38,37 @@ func wrap(stage Stage, done In) Stage {
 					}
 					select {
 					case <-done:
-						drain(in)
 						return
-					case proxy <- val:
+					case proxyIn <- val:
 					}
 				}
 			}
 		}()
 
-		return stage(proxy)
+		// outer chan producer
+		go func() {
+			defer func() {
+				close(proxyOut)
+				drain(stageOut)
+			}()
+			for {
+				select {
+				case <-done:
+					return
+				case val, ok := <-stageOut:
+					if !ok {
+						return
+					}
+					select {
+					case <-done:
+						return
+					case proxyOut <- val:
+					}
+				}
+			}
+		}()
+
+		return proxyOut
 	}
 }
 
