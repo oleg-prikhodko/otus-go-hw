@@ -31,7 +31,7 @@ func NewServer(logger common.Logger, app common.Application, addr string) *Serve
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	s.logger.Info(fmt.Sprintf("starting server at %s", s.server.Addr))
+	s.logger.Info(fmt.Sprintf("starting http server at %s", s.server.Addr))
 
 	go func() {
 		err := s.server.ListenAndServe()
@@ -41,7 +41,7 @@ func (s *Server) Start(ctx context.Context) error {
 	}()
 
 	<-ctx.Done()
-	s.logger.Info("shutting down server")
+	s.logger.Info("shutting down http server")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

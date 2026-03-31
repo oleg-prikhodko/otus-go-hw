@@ -4,5 +4,8 @@ logger:
 server:
   addr: "localhost:8080"
 
+grpc:
+  addr: "localhost:9090"
+
 storage:
   type: "MEMORY"
