@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package calendar;
 
-option go_package = "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_16_calendar/internal/server/grpc/proto";
+option go_package = "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/grpc/proto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";

@@ -583,7 +583,7 @@ const file_proto_calendar_proto_rawDesc = "" +
 	"\vDeleteEvent\x12\x1c.calendar.DeleteEventRequest\x1a\x1d.calendar.DeleteEventResponse\x12M\n" +
 	"\x10ListEventsForDay\x12\x1b.calendar.ListEventsRequest\x1a\x1c.calendar.ListEventsResponse\x12N\n" +
 	"\x11ListEventsForWeek\x12\x1b.calendar.ListEventsRequest\x1a\x1c.calendar.ListEventsResponse\x12O\n" +
-	"\x12ListEventsForMonth\x12\x1b.calendar.ListEventsRequest\x1a\x1c.calendar.ListEventsResponseB[ZYgithub.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_16_calendar/internal/server/grpc/protob\x06proto3"
+	"\x12ListEventsForMonth\x12\x1b.calendar.ListEventsRequest\x1a\x1c.calendar.ListEventsResponseBXZVgithub.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/grpc/protob\x06proto3"
 
 var (
 	file_proto_calendar_proto_rawDescOnce sync.Once
