@@ -25,7 +25,6 @@ func TestCreateEvent(t *testing.T) {
 	}
 
 	resp, err := server.CreateEvent(context.Background(), req)
-
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
