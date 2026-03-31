@@ -3,7 +3,7 @@ package common
 import (
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage" //nolint:depguard
 )
 
 type MockLogger struct {
@@ -60,14 +60,14 @@ func (m *MockApp) DeleteEvent(id string) error {
 	return m.EventDeleteErr
 }
 
-func (m *MockApp) ListEventsForDay(date time.Time) ([]storage.Event, error) {
+func (m *MockApp) ListEventsForDay(_ time.Time) ([]storage.Event, error) {
 	return m.ListDayEvents, m.ListDayErr
 }
 
-func (m *MockApp) ListEventsForWeek(date time.Time) ([]storage.Event, error) {
+func (m *MockApp) ListEventsForWeek(_ time.Time) ([]storage.Event, error) {
 	return m.ListWeekEvents, m.ListWeekErr
 }
 
-func (m *MockApp) ListEventsForMonth(date time.Time) ([]storage.Event, error) {
+func (m *MockApp) ListEventsForMonth(_ time.Time) ([]storage.Event, error) {
 	return m.ListMonthEvents, m.ListMonthErr
 }

@@ -6,9 +6,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
-	pb "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/grpc/proto"
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"               //nolint:depguard
+	pb "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/grpc/proto" //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"              //nolint:depguard
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -58,7 +58,7 @@ func (s *Server) Stop() {
 	s.server.GracefulStop()
 }
 
-func (s *Server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
+func (s *Server) CreateEvent(_ context.Context, req *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
 	ev := storage.Event{
 		Title:        req.Title,
 		Time:         req.Time.AsTime(),
@@ -75,7 +75,7 @@ func (s *Server) CreateEvent(ctx context.Context, req *pb.CreateEventRequest) (*
 	return &pb.CreateEventResponse{Id: ev.ID}, nil
 }
 
-func (s *Server) UpdateEvent(ctx context.Context, req *pb.UpdateEventRequest) (*pb.UpdateEventResponse, error) {
+func (s *Server) UpdateEvent(_ context.Context, req *pb.UpdateEventRequest) (*pb.UpdateEventResponse, error) {
 	ev := storage.Event{
 		ID:           req.Id,
 		Title:        req.Title,
@@ -93,7 +93,7 @@ func (s *Server) UpdateEvent(ctx context.Context, req *pb.UpdateEventRequest) (*
 	return &pb.UpdateEventResponse{}, nil
 }
 
-func (s *Server) DeleteEvent(ctx context.Context, req *pb.DeleteEventRequest) (*pb.DeleteEventResponse, error) {
+func (s *Server) DeleteEvent(_ context.Context, req *pb.DeleteEventRequest) (*pb.DeleteEventResponse, error) {
 	if err := s.app.DeleteEvent(req.Id); err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (s *Server) DeleteEvent(ctx context.Context, req *pb.DeleteEventRequest) (*
 	return &pb.DeleteEventResponse{}, nil
 }
 
-func (s *Server) ListEventsForDay(ctx context.Context, req *pb.ListEventsRequest) (*pb.ListEventsResponse, error) {
+func (s *Server) ListEventsForDay(_ context.Context, req *pb.ListEventsRequest) (*pb.ListEventsResponse, error) {
 	events, err := s.app.ListEventsForDay(req.Date.AsTime())
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (s *Server) ListEventsForDay(ctx context.Context, req *pb.ListEventsRequest
 	return &pb.ListEventsResponse{Events: eventsToProto(events)}, nil
 }
 
-func (s *Server) ListEventsForWeek(ctx context.Context, req *pb.ListEventsRequest) (*pb.ListEventsResponse, error) {
+func (s *Server) ListEventsForWeek(_ context.Context, req *pb.ListEventsRequest) (*pb.ListEventsResponse, error) {
 	events, err := s.app.ListEventsForWeek(req.Date.AsTime())
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (s *Server) ListEventsForWeek(ctx context.Context, req *pb.ListEventsReques
 	return &pb.ListEventsResponse{Events: eventsToProto(events)}, nil
 }
 
-func (s *Server) ListEventsForMonth(ctx context.Context, req *pb.ListEventsRequest) (*pb.ListEventsResponse, error) {
+func (s *Server) ListEventsForMonth(_ context.Context, req *pb.ListEventsRequest) (*pb.ListEventsResponse, error) {
 	events, err := s.app.ListEventsForMonth(req.Date.AsTime())
 	if err != nil {
 		return nil, err
