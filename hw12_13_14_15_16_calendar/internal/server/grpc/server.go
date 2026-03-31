@@ -6,7 +6,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"
 	pb "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/server/grpc/proto"
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
@@ -18,12 +17,12 @@ import (
 type Server struct {
 	pb.UnimplementedCalendarServiceServer
 	server *grpc.Server
-	app    *app.App
+	app    common.Application
 	logger common.Logger
 	addr   string
 }
 
-func NewServer(logger common.Logger, app *app.App, addr string) *Server {
+func NewServer(logger common.Logger, app common.Application, addr string) *Server {
 	return &Server{
 		app:    app,
 		logger: logger,
