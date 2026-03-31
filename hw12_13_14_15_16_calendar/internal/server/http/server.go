@@ -17,9 +17,13 @@ type Server struct {
 
 func NewServer(logger common.Logger, app common.Application, addr string) *Server {
 	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte("hello world"))
-	}))
+
+	mux.HandleFunc("POST /events", handleCreateEvent(app))
+	mux.HandleFunc("PUT /events/{id}", handleUpdateEvent(app))
+	mux.HandleFunc("DELETE /events/{id}", handleDeleteEvent(app))
+	mux.HandleFunc("GET /events/day", handleListDayEvents(app))
+	mux.HandleFunc("GET /events/week", handleListWeekEvents(app))
+	mux.HandleFunc("GET /events/month", handleListMonthEvents(app))
 
 	server := &http.Server{Addr: addr, Handler: loggingMiddleware(logger, mux)} //nolint:gosec
 
