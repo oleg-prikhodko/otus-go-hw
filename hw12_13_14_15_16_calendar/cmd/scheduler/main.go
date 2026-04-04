@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/app"                          //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"                       //nolint:depguard
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/logger"                       //nolint:depguard
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/rabbitmq"                     //nolint:depguard
 	eventstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"         //nolint:depguard
@@ -72,33 +73,43 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			events, err := calendar.ListForNotification()
-			if err != nil {
-				logg.Error("ListForNotification error: " + err.Error())
-				continue
-			}
-
-			if len(events) == 0 {
-				logg.Info("no events to notify")
-				continue
-			}
-
-			for _, ev := range events {
-				eventJSON, err := json.Marshal(ev)
-				if err != nil {
-					logg.Error("failed to marshal event: " + err.Error())
-					continue
-				}
-				logg.Info(fmt.Sprintf("sending event to RabbitMQ: %s", string(eventJSON)))
-
-				if err := queueClient.Publish(ctx, ev); err != nil {
-					logg.Error("failed to publish event to RabbitMQ: " + err.Error())
-				}
-			}
-
+			sendNotifications(ctx, calendar, queueClient, logg)
+			deleteOutdated(calendar, logg)
 		case <-ctx.Done():
 			logg.Info("scheduler shutting down")
 			return
 		}
+	}
+}
+
+func sendNotifications(ctx context.Context, calendar *app.App, queueClient *rabbitmq.QueueClient, logg common.Logger) {
+	events, err := calendar.ListForNotification()
+	if err != nil {
+		logg.Error("ListForNotification error: " + err.Error())
+		return
+	}
+
+	if len(events) == 0 {
+		logg.Info("no events to notify")
+		return
+	}
+
+	for _, ev := range events {
+		eventJSON, err := json.Marshal(ev)
+		if err != nil {
+			logg.Error("failed to marshal event: " + err.Error())
+			continue
+		}
+		logg.Info(fmt.Sprintf("sending event to RabbitMQ: %s", string(eventJSON)))
+
+		if err := queueClient.Publish(ctx, ev); err != nil {
+			logg.Error("failed to publish event to RabbitMQ: " + err.Error())
+		}
+	}
+}
+
+func deleteOutdated(calendar *app.App, logg common.Logger) {
+	if err := calendar.DeleteOutdated(); err != nil {
+		logg.Error("DeleteOutdated error: " + err.Error())
 	}
 }
