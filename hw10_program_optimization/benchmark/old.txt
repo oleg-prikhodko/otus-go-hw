@@ -1,0 +1,16 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/oleg-prikhodko/otus-go-hw/hw10_program_optimization
+cpu: Apple M1
+BenchmarkGetDomainStat-8   	       6	 186093368 ns/op	265019880 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 199224042 ns/op	265021594 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 187309382 ns/op	265021645 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 189871014 ns/op	265015381 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 191893798 ns/op	265022032 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 186671479 ns/op	265014104 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 204502222 ns/op	265015120 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 196353479 ns/op	265014328 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 203208278 ns/op	265023333 B/op	 1200058 allocs/op
+BenchmarkGetDomainStat-8   	       6	 188105715 ns/op	265019517 B/op	 1200058 allocs/op
+PASS
+ok  	github.com/oleg-prikhodko/otus-go-hw/hw10_program_optimization	23.442s
