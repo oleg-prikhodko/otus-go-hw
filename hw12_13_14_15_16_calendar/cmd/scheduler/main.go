@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/app"                          //nolint:depguard
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/logger"                       //nolint:depguard
+	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/rabbitmq"                     //nolint:depguard
 	eventstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage"         //nolint:depguard
 	memorystorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/memory" //nolint:depguard
 	sqlstorage "github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage/sql"       //nolint:depguard
@@ -44,6 +46,18 @@ func main() {
 	}
 	defer storage.Close()
 
+	publisher, err := rabbitmq.NewPublisher(
+		config.RabbitMQ.Addr,
+		config.RabbitMQ.Username,
+		config.RabbitMQ.Password,
+		config.RabbitMQ.Queue,
+	)
+	if err != nil {
+		logg.Error("failed to create RabbitMQ publisher: " + err.Error())
+		os.Exit(1)
+	}
+	defer publisher.Close()
+
 	calendar := app.New(logg, storage)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
@@ -70,7 +84,16 @@ func main() {
 			}
 
 			for _, ev := range events {
-				logg.Info(fmt.Sprintf("notifying about event: %v", ev))
+				eventJSON, err := json.Marshal(ev)
+				if err != nil {
+					logg.Error("failed to marshal event: " + err.Error())
+					continue
+				}
+				logg.Info(fmt.Sprintf("sending event to RabbitMQ: %s", string(eventJSON)))
+
+				if err := publisher.Publish(ctx, ev); err != nil {
+					logg.Error("failed to publish event to RabbitMQ: " + err.Error())
+				}
 			}
 
 		case <-ctx.Done():

@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Logger  LoggerConf
-	Storage StorageConf
+	Logger   LoggerConf
+	Storage  StorageConf
+	RabbitMQ RabbitMQConf
 }
 
 type LoggerConf struct {
@@ -26,6 +27,13 @@ const (
 type StorageConf struct {
 	Type StorageType `yaml:"type"`
 	Addr string      `yaml:"addr"`
+}
+
+type RabbitMQConf struct {
+	Addr     string `yaml:"addr"`
+	Queue    string `yaml:"queue"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 func NewConfig(configFile string) Config {
