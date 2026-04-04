@@ -37,6 +37,44 @@ func TestPipeline(t *testing.T) {
 		g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
 	}
 
+	t.Run("simple math functions", func(t *testing.T) {
+		in := make(chan any, 5)
+		for i := 0; i < 5; i++ {
+			in <- i
+		}
+		close(in)
+
+		stages := []Stage{
+			func(in In) Out {
+				o := make(chan interface{})
+				go func() {
+					defer close(o)
+					for data := range in {
+						o <- data.(int) * 2
+					}
+				}()
+				return o
+			},
+			func(in In) Out {
+				o := make(chan interface{})
+				go func() {
+					defer close(o)
+					for data := range in {
+						o <- data.(int) + 10
+					}
+				}()
+				return o
+			},
+		}
+
+		result := make([]int, 0, 5)
+		for val := range ExecutePipeline(in, nil, stages...) {
+			result = append(result, val.(int))
+		}
+
+		require.ElementsMatch(t, result, []int{10, 12, 14, 16, 18})
+	})
+
 	t.Run("simple case", func(t *testing.T) {
 		in := make(Bi)
 		data := []int{1, 2, 3, 4, 5}
@@ -145,6 +183,5 @@ func TestAllStageStop(t *testing.T) {
 		wg.Wait()
 
 		require.Len(t, result, 0)
-
 	})
 }

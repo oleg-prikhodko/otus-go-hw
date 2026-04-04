@@ -1,20 +1,38 @@
 package logger
 
-import "fmt"
+import (
+	"log/slog"
+	"strings"
+)
 
-type Logger struct { // TODO
+type Logger struct {
+	level  string
+	logger *slog.Logger
 }
 
 func New(level string) *Logger {
-	return &Logger{}
+	normalizedLevel := strings.ToLower(level)
+
+	switch normalizedLevel {
+	case "debug":
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	case "info":
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	case "warn":
+		slog.SetLogLoggerLevel(slog.LevelWarn)
+	case "error":
+		slog.SetLogLoggerLevel(slog.LevelError)
+	default:
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	}
+
+	return &Logger{level, slog.Default()}
 }
 
 func (l Logger) Info(msg string) {
-	fmt.Println(msg)
+	l.logger.Info(msg)
 }
 
 func (l Logger) Error(msg string) {
-	// TODO
+	l.logger.Error(msg)
 }
-
-// TODO
