@@ -46,7 +46,7 @@ func main() {
 	}
 	defer storage.Close()
 
-	publisher, err := rabbitmq.NewPublisher(
+	queueClient, err := rabbitmq.NewQueueClient(
 		config.RabbitMQ.Addr,
 		config.RabbitMQ.Username,
 		config.RabbitMQ.Password,
@@ -56,7 +56,7 @@ func main() {
 		logg.Error("failed to create RabbitMQ publisher: " + err.Error())
 		os.Exit(1)
 	}
-	defer publisher.Close()
+	defer queueClient.Close()
 
 	calendar := app.New(logg, storage)
 
@@ -91,7 +91,7 @@ func main() {
 				}
 				logg.Info(fmt.Sprintf("sending event to RabbitMQ: %s", string(eventJSON)))
 
-				if err := publisher.Publish(ctx, ev); err != nil {
+				if err := queueClient.Publish(ctx, ev); err != nil {
 					logg.Error("failed to publish event to RabbitMQ: " + err.Error())
 				}
 			}

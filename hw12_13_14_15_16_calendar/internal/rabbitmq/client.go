@@ -9,13 +9,13 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go" //nolint:depguard
 )
 
-type Publisher struct {
+type QueueClient struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	queue   amqp.Queue
 }
 
-func NewPublisher(addr, username, password, queueName string) (*Publisher, error) {
+func NewQueueClient(addr, username, password, queueName string) (*QueueClient, error) {
 	connStr := fmt.Sprintf("amqp://%s:%s@%s/", username, password, addr)
 
 	conn, err := amqp.Dial(connStr)
@@ -43,17 +43,17 @@ func NewPublisher(addr, username, password, queueName string) (*Publisher, error
 		return nil, fmt.Errorf("failed to declare queue: %w", err)
 	}
 
-	return &Publisher{
+	return &QueueClient{
 		conn:    conn,
 		channel: channel,
 		queue:   queue,
 	}, nil
 }
 
-func (p *Publisher) Publish(ctx context.Context, event interface{}) error {
-	body, err := json.Marshal(event)
+func (p *QueueClient) Publish(ctx context.Context, msg any) error {
+	body, err := json.Marshal(msg)
 	if err != nil {
-		return fmt.Errorf("failed to marshal event: %w", err)
+		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -78,7 +78,23 @@ func (p *Publisher) Publish(ctx context.Context, event interface{}) error {
 	return nil
 }
 
-func (p *Publisher) Close() error {
+func (p *QueueClient) Consume() (<-chan amqp.Delivery, error) {
+	msgs, err := p.channel.Consume(
+		p.queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register consumer: %w", err)
+	}
+	return msgs, nil
+}
+
+func (p *QueueClient) Close() error {
 	if err := p.channel.Close(); err != nil {
 		return fmt.Errorf("failed to close channel: %w", err)
 	}
