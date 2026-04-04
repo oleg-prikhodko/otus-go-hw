@@ -41,6 +41,7 @@ func main() {
 			logg.Error("failed to connect to db: " + err.Error())
 			os.Exit(1)
 		}
+		storage = s
 	default:
 		logg.Error("unknown storage type: " + string(config.Storage.Type))
 		os.Exit(1)
