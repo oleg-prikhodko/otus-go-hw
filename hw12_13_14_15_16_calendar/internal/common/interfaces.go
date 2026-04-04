@@ -19,4 +19,5 @@ type Application interface {
 	ListEventsForWeek(date time.Time) ([]storage.Event, error)
 	ListEventsForMonth(date time.Time) ([]storage.Event, error)
 	ListForNotification() ([]storage.Event, error)
+	DeleteOutdated() error
 }

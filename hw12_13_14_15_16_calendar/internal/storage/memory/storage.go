@@ -76,6 +76,17 @@ func (s *Storage) ListForNotification(from time.Time, to time.Time) ([]storage.E
 	return events, nil
 }
 
+func (s *Storage) DeleteOutdated(olderThan time.Time) error {
+	s.events.Range(func(k, v any) bool {
+		ev := v.(storage.Event)
+		if ev.Time.Before(olderThan) {
+			s.events.Delete(k)
+		}
+		return true
+	})
+	return nil
+}
+
 func New() *Storage {
 	return &Storage{events: sync.Map{}}
 }

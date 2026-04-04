@@ -145,3 +145,16 @@ func (s *Storage) ListForNotification(from time.Time, to time.Time) ([]storage.E
 
 	return events, nil
 }
+
+func (s *Storage) DeleteOutdated(olderThan time.Time) error {
+	if s.db == nil {
+		return ErrNotConnected
+	}
+
+	_, err := s.db.Exec("DELETE FROM events WHERE event_time < $1;", olderThan)
+	if err != nil {
+		return fmt.Errorf("failed to delete outdated events: %w", err)
+	}
+
+	return nil
+}

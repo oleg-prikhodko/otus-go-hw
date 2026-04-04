@@ -22,4 +22,5 @@ type EventStorage interface {
 	Delete(id string) error
 	List(from time.Time, to time.Time) ([]Event, error)
 	ListForNotification(from time.Time, to time.Time) ([]Event, error)
+	DeleteOutdated(olderThan time.Time) error
 }
