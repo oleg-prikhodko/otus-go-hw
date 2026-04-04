@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Logger  LoggerConf
 	Server  ServerConf
+	GRPC    GRPCConf
 	Storage StorageConf
 }
 
@@ -18,6 +19,10 @@ type LoggerConf struct {
 }
 
 type ServerConf struct {
+	Addr string `yaml:"addr"`
+}
+
+type GRPCConf struct {
 	Addr string `yaml:"addr"`
 }
 

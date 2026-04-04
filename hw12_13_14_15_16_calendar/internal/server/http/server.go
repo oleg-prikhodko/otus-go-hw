@@ -17,9 +17,13 @@ type Server struct {
 
 func NewServer(logger common.Logger, app common.Application, addr string) *Server {
 	mux := http.NewServeMux()
-	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte("hello world"))
-	}))
+
+	mux.HandleFunc("POST /events", handleCreateEvent(app))
+	mux.HandleFunc("PUT /events/{id}", handleUpdateEvent(app))
+	mux.HandleFunc("DELETE /events/{id}", handleDeleteEvent(app))
+	mux.HandleFunc("GET /events/day", handleListDayEvents(app))
+	mux.HandleFunc("GET /events/week", handleListWeekEvents(app))
+	mux.HandleFunc("GET /events/month", handleListMonthEvents(app))
 
 	server := &http.Server{Addr: addr, Handler: loggingMiddleware(logger, mux)} //nolint:gosec
 
@@ -27,7 +31,7 @@ func NewServer(logger common.Logger, app common.Application, addr string) *Serve
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	s.logger.Info(fmt.Sprintf("starting server at %s", s.server.Addr))
+	s.logger.Info(fmt.Sprintf("starting http server at %s", s.server.Addr))
 
 	go func() {
 		err := s.server.ListenAndServe()
@@ -37,7 +41,7 @@ func (s *Server) Start(ctx context.Context) error {
 	}()
 
 	<-ctx.Done()
-	s.logger.Info("shutting down server")
+	s.logger.Info("shutting down http server")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
