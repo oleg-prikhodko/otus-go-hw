@@ -21,4 +21,5 @@ type EventStorage interface {
 	Update(ev Event) error
 	Delete(id string) error
 	List(from time.Time, to time.Time) ([]Event, error)
+	ListForNotification(from time.Time, to time.Time) ([]Event, error)
 }

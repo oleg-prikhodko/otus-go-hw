@@ -57,6 +57,25 @@ func (s *Storage) List(from time.Time, to time.Time) ([]storage.Event, error) {
 	return events, nil
 }
 
+func (s *Storage) ListForNotification(from time.Time, to time.Time) ([]storage.Event, error) {
+	var events []storage.Event
+
+	s.events.Range(func(_, v any) bool {
+		ev := v.(storage.Event)
+		var before time.Duration
+		if ev.NotifyBefore != nil {
+			before = *ev.NotifyBefore
+		}
+		if ev.Time.Add(-before).After(from) && ev.Time.Add(-before).Before(to) {
+			events = append(events, ev)
+		}
+
+		return true
+	})
+
+	return events, nil
+}
+
 func New() *Storage {
 	return &Storage{events: sync.Map{}}
 }
