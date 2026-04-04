@@ -41,7 +41,7 @@ func main() {
 	msgs, err := queueClient.Consume()
 	if err != nil {
 		logg.Error("failed to start consuming: " + err.Error())
-		os.Exit(1)
+		return
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

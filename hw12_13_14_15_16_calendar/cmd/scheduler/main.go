@@ -54,7 +54,7 @@ func main() {
 	)
 	if err != nil {
 		logg.Error("failed to create RabbitMQ publisher: " + err.Error())
-		os.Exit(1)
+		return
 	}
 	defer queueClient.Close()
 
