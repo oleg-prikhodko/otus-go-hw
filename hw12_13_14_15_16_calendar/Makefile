@@ -1,4 +1,5 @@
-BIN := "./bin/calendar"
+BIN_DIR := "./bin"
+BINARIES := calendar scheduler sender
 DOCKER_IMG="calendar:develop"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
@@ -37,7 +38,8 @@ run-rabbit:
 	rabbitmq:management
 
 build:
-	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	mkdir -p $(BIN_DIR)
+	$(foreach binary,$(BINARIES),go build -v -o $(BIN_DIR)/$(binary) -ldflags "$(LDFLAGS)" ./cmd/$(binary) &&) true
 
 run: build
 	$(BIN) -config ./configs/config.yaml
