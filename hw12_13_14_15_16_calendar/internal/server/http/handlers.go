@@ -20,10 +20,10 @@ func handleCreateEvent(app common.Application) http.HandlerFunc {
 		ev := storage.Event{
 			Title:        req.Title,
 			Time:         req.Time,
-			Duration:     req.Duration,
+			Duration:     time.Duration(req.Duration),
 			Description:  req.Description,
 			OwnerID:      req.OwnerID,
-			NotifyBefore: req.NotifyBefore,
+			NotifyBefore: durationPtr(req.NotifyBefore),
 		}
 
 		if err := app.CreateEvent(ev); err != nil {
@@ -49,10 +49,10 @@ func handleUpdateEvent(app common.Application) http.HandlerFunc {
 			ID:           id,
 			Title:        req.Title,
 			Time:         req.Time,
-			Duration:     req.Duration,
+			Duration:     time.Duration(req.Duration),
 			Description:  req.Description,
 			OwnerID:      req.OwnerID,
-			NotifyBefore: req.NotifyBefore,
+			NotifyBefore: durationPtr(req.NotifyBefore),
 		}
 
 		if err := app.UpdateEvent(ev); err != nil {
@@ -159,6 +159,14 @@ func eventsToResponse(events []storage.Event) []EventResponse {
 
 func writeError(w http.ResponseWriter, code int, message string) {
 	writeJSON(w, code, ErrorResponse{Error: message})
+}
+
+func durationPtr(v *int64) *time.Duration {
+	if v == nil {
+		return nil
+	}
+	d := time.Duration(*v)
+	return &d
 }
 
 func writeJSON(w http.ResponseWriter, code int, data interface{}) {

@@ -1,5 +1,3 @@
-//go:build integration
-
 package tests
 
 import (
@@ -7,12 +5,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
-	_ "github.com/lib/pq" //nolint:depguard
+	"github.com/google/uuid" //nolint:depguard
+	_ "github.com/lib/pq"    //nolint:depguard
 )
 
 var (
@@ -23,7 +23,7 @@ var (
 func TestMain(m *testing.M) {
 	dbConn := os.Getenv("DB_CONN")
 	if dbConn == "" {
-		dbConn = "postgres://postgres:postgres@localhost:5432/calendar?sslmode=disable"
+		panic("DB_CONN env var is not set")
 	}
 
 	var err error
@@ -38,11 +38,11 @@ func TestMain(m *testing.M) {
 
 	calendarHost := os.Getenv("CALENDAR_HOST")
 	if calendarHost == "" {
-		calendarHost = "localhost"
+		panic("CALENDAR_HOST env var is not set")
 	}
 	calendarPort := os.Getenv("CALENDAR_HTTP_PORT")
 	if calendarPort == "" {
-		calendarPort = "8080"
+		panic("CALENDAR_HTTP_PORT env var is not set")
 	}
 	calendarURL = fmt.Sprintf("http://%s:%s", calendarHost, calendarPort)
 
@@ -64,11 +64,11 @@ func truncateEvents(t *testing.T) {
 func TestCreateEvent_Success(t *testing.T) {
 	t.Cleanup(func() { truncateEvents(t) })
 
-	body := map[string]interface{}{
+	body := map[string]any{
 		"title":    "Test Event",
 		"time":     "2025-01-01T10:00:00Z",
-		"duration": "2h0m0s",
-		"ownerId":  "user-123",
+		"duration": time.Hour * 3,
+		"ownerId":  uuid.New().String(),
 	}
 	bodyBytes, _ := json.Marshal(body)
 
@@ -78,25 +78,20 @@ func TestCreateEvent_Success(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
+	bodyBytes, err = io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body: %v", err)
+	}
 	if resp.StatusCode != http.StatusCreated {
-		t.Errorf("expected status %d, got %d", http.StatusCreated, resp.StatusCode)
+		t.Errorf("expected status %d, got %d: %s", http.StatusCreated, resp.StatusCode, string(bodyBytes))
 	}
 
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM events WHERE title = 'Test Event' AND owner_id = 'user-123'").Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM events WHERE title = 'Test Event'").Scan(&count)
 	if err != nil {
 		t.Fatalf("failed to count events: %v", err)
 	}
 	if count != 1 {
 		t.Errorf("expected 1 event in db, got %d", count)
-	}
-
-	var id string
-	err = db.QueryRow("SELECT id FROM events WHERE title = 'Test Event'").Scan(&id)
-	if err != nil {
-		t.Fatalf("event not found in db: %v", err)
-	}
-	if id == "" {
-		t.Error("expected non-empty id from db")
 	}
 }

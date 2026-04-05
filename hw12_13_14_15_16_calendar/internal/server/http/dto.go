@@ -7,22 +7,22 @@ import (
 )
 
 type CreateEventRequest struct {
-	Title        string         `json:"title"`
-	Time         time.Time      `json:"time"`
-	Duration     time.Duration  `json:"duration"`
-	Description  *string        `json:"description,omitempty"`
-	OwnerID      string         `json:"ownerId"`
-	NotifyBefore *time.Duration `json:"notifyBefore,omitempty"`
+	Title        string    `json:"title"`
+	Time         time.Time `json:"time"`
+	Duration     int64     `json:"duration"`
+	Description  *string   `json:"description,omitempty"`
+	OwnerID      string    `json:"ownerId"`
+	NotifyBefore *int64    `json:"notifyBefore,omitempty"`
 }
 
 type UpdateEventRequest struct {
-	ID           string         `json:"id"`
-	Title        string         `json:"title"`
-	Time         time.Time      `json:"time"`
-	Duration     time.Duration  `json:"duration"`
-	Description  *string        `json:"description,omitempty"`
-	OwnerID      string         `json:"ownerId"`
-	NotifyBefore *time.Duration `json:"notifyBefore,omitempty"`
+	ID           string    `json:"id"`
+	Title        string    `json:"title"`
+	Time         time.Time `json:"time"`
+	Duration     int64     `json:"duration"`
+	Description  *string   `json:"description,omitempty"`
+	OwnerID      string    `json:"ownerId"`
+	NotifyBefore *int64    `json:"notifyBefore,omitempty"`
 }
 
 type DeleteEventRequest struct {
@@ -34,24 +34,29 @@ type ListEventsRequest struct {
 }
 
 type EventResponse struct {
-	ID           string         `json:"id"`
-	Title        string         `json:"title"`
-	Time         time.Time      `json:"time"`
-	Duration     time.Duration  `json:"duration"`
-	Description  *string        `json:"description,omitempty"`
-	OwnerID      string         `json:"ownerId"`
-	NotifyBefore *time.Duration `json:"notifyBefore,omitempty"`
+	ID           string    `json:"id"`
+	Title        string    `json:"title"`
+	Time         time.Time `json:"time"`
+	Duration     int64     `json:"duration"`
+	Description  *string   `json:"description,omitempty"`
+	OwnerID      string    `json:"ownerId"`
+	NotifyBefore *int64    `json:"notifyBefore,omitempty"`
 }
 
 func EventToResponse(ev storage.Event) EventResponse {
+	var notifyBefore *int64
+	if ev.NotifyBefore != nil {
+		nano := ev.NotifyBefore.Nanoseconds()
+		notifyBefore = &nano
+	}
 	return EventResponse{
 		ID:           ev.ID,
 		Title:        ev.Title,
 		Time:         ev.Time,
-		Duration:     ev.Duration,
+		Duration:     ev.Duration.Nanoseconds(),
 		Description:  ev.Description,
 		OwnerID:      ev.OwnerID,
-		NotifyBefore: ev.NotifyBefore,
+		NotifyBefore: notifyBefore,
 	}
 }
 
