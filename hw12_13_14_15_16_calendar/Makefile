@@ -83,9 +83,10 @@ down:
 	docker compose -f deployments/docker-compose.yaml down
 
 integration-tests:
-	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test up -d calendar
-	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test run --rm --build tests; exit_code=$$?; \
-	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test down; \
-	exit $$exit_code
+	@docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test up -d calendar; \
+    	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test run --rm tests; \
+    	status=$$?; \
+    	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test down; \
+    	exit $$status
 
 .PHONY: build run build-img run-img version test test-integration lint migrate-up migrate-down generate up down integration-tests
