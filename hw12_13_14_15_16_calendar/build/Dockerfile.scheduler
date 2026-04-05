@@ -12,13 +12,14 @@ RUN CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o scheduler ./cmd/scheduler
 
 FROM alpine:3.9
 
-RUN apk add --no-cache ca-certificates bash
+RUN apk add --no-cache ca-certificates bash gettext
 
 WORKDIR /app
 
 COPY --from=build /build/scheduler /app/scheduler
 COPY deployments/config.scheduler.yaml /etc/calendar/config.yaml
 COPY deployments/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/app/scheduler", "-config", "/etc/calendar/config.yaml"]

@@ -61,6 +61,11 @@ func main() {
 				continue
 			}
 			logg.Info(fmt.Sprintf("received event: %+v", ev))
+
+			if err := queueClient.PublishTo(ctx, "sent_events", ev); err != nil {
+				logg.Error("failed to publish event: " + err.Error())
+				continue
+			}
 		}
 	}
 }

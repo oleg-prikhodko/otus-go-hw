@@ -62,11 +62,21 @@ func main() {
 
 	calendar := app.New(logg, storage)
 
+	interval := time.Minute
+	if config.Scheduler.Interval != "" {
+		parsed, err := time.ParseDuration(config.Scheduler.Interval)
+		if err != nil {
+			logg.Error("failed to parse scheduler interval: " + err.Error())
+			return
+		}
+		interval = parsed
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	logg.Info("scheduler started")

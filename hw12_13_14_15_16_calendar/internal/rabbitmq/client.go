@@ -51,6 +51,10 @@ func NewQueueClient(addr, username, password, queueName string) (*QueueClient, e
 }
 
 func (p *QueueClient) Publish(ctx context.Context, msg any) error {
+	return p.PublishTo(ctx, p.queue.Name, msg)
+}
+
+func (p *QueueClient) PublishTo(ctx context.Context, queueName string, msg any) error {
 	body, err := json.Marshal(msg)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -62,7 +66,7 @@ func (p *QueueClient) Publish(ctx context.Context, msg any) error {
 	err = p.channel.PublishWithContext(
 		ctx,
 		"",
-		p.queue.Name,
+		queueName,
 		false,
 		false,
 		amqp.Publishing{

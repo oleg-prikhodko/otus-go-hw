@@ -10,3 +10,6 @@ rabbitmq:
   queue: "${RABBITMQ_QUEUE}"
   username: "${RABBITMQ_USER}"
   password: "${RABBITMQ_PASS}"
+
+scheduler:
+  interval: "${SCHEDULER_INTERVAL}"

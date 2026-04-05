@@ -83,8 +83,8 @@ down:
 	docker compose -f deployments/docker-compose.yaml down
 
 integration-tests:
-	@docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test up -d calendar; \
-    	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test run --rm tests; \
+	@docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test up -d calendar scheduler sender; \
+    	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test run --rm --build tests; \
     	status=$$?; \
     	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test down; \
     	exit $$status

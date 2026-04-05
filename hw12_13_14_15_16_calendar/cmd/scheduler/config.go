@@ -8,9 +8,14 @@ import (
 )
 
 type Config struct {
-	Logger   LoggerConf
-	Storage  StorageConf
-	RabbitMQ RabbitMQConf
+	Logger    LoggerConf
+	Storage   StorageConf
+	RabbitMQ  RabbitMQConf
+	Scheduler SchedulerConf
+}
+
+type SchedulerConf struct {
+	Interval string `yaml:"interval"`
 }
 
 type LoggerConf struct {
