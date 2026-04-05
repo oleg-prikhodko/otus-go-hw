@@ -7,6 +7,6 @@ storage:
 
 rabbitmq:
   addr: "${RABBITMQ_HOST}:${RABBITMQ_PORT}"
-  queue: "calendar_events"
+  queue: "${RABBITMQ_QUEUE}"
   username: "${RABBITMQ_USER}"
   password: "${RABBITMQ_PASS}"
