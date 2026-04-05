@@ -2,6 +2,7 @@ package internalhttp
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -69,6 +70,10 @@ func handleDeleteEvent(app common.Application) http.HandlerFunc {
 		id := r.PathValue("id")
 
 		if err := app.DeleteEvent(id); err != nil {
+			if errors.Is(err, common.ErrNotFound) {
+				writeError(w, http.StatusNotFound, err.Error())
+				return
+			}
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
