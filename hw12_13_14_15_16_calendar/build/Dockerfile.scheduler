@@ -1,0 +1,22 @@
+FROM golang:1.23 as build
+
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+ARG LDFLAGS
+RUN CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -o scheduler ./cmd/scheduler
+
+FROM alpine:3.9
+
+RUN apk add --no-cache ca-certificates
+
+WORKDIR /app
+
+COPY --from=build /build/scheduler /app/scheduler
+COPY configs/config.yaml /etc/calendar/config.yaml
+
+CMD ["/app/scheduler", "-config", "/etc/calendar/config.yaml"]

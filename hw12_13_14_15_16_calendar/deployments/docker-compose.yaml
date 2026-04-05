@@ -2,13 +2,18 @@ services:
   db:
     image: postgres:17
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: calendar
     ports:
       - "5437:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -16,10 +21,61 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: password
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "sleep 2 && goose -dir /migrations postgres \"postgres://postgres:postgres@db:5432/calendar?sslmode=disable\" up"]
+    volumes:
+      - ../migrations:/migrations
+
+  calendar:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.calendar
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    volumes:
+      - ./config.calendar.yaml:/etc/calendar/config.yaml:ro
+
+  scheduler:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.scheduler
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./config.scheduler.yaml:/etc/calendar/config.yaml:ro
+
+  sender:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.sender
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./config.sender.yaml:/etc/calendar/config.yaml:ro
 
 volumes:
   postgres_data:

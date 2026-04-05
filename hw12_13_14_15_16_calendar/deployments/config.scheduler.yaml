@@ -1,0 +1,12 @@
+logger:
+  level: "INFO"
+
+storage:
+  type: SQL
+  addr: "postgres://postgres:postgres@db:5432/calendar?sslmode=disable"
+
+rabbitmq:
+  addr: "rabbitmq:5672"
+  queue: "calendar_events"
+  username: "rabbit"
+  password: "password"

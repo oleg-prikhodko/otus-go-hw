@@ -1,0 +1,12 @@
+logger:
+  level: "INFO"
+
+server:
+  addr: "0.0.0.0:8080"
+
+grpc:
+  addr: "0.0.0.0:9090"
+
+storage:
+  type: SQL
+  addr: "postgres://postgres:postgres@db:5432/calendar?sslmode=disable"

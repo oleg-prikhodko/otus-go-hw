@@ -1,0 +1,8 @@
+logger:
+  level: "INFO"
+
+rabbitmq:
+  addr: "rabbitmq:5672"
+  queue: "calendar_events"
+  username: "rabbit"
+  password: "password"

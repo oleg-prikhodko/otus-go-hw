@@ -76,4 +76,10 @@ migrate-down:
 generate:
 	go generate ./internal/server/grpc/...
 
-.PHONY: build run build-img run-img version test test-integration lint migrate-up migrate-down generate
+up:
+	docker compose -f deployments/docker-compose.yaml up -d
+
+down:
+	docker compose -f deployments/docker-compose.yaml down
+
+.PHONY: build run build-img run-img version test test-integration lint migrate-up migrate-down generate up down
