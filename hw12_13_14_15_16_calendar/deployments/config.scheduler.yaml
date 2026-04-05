@@ -3,10 +3,10 @@ logger:
 
 storage:
   type: SQL
-  addr: "postgres://postgres:postgres@db:5432/calendar?sslmode=disable"
+  addr: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
 
 rabbitmq:
-  addr: "rabbitmq:5672"
+  addr: "${RABBITMQ_HOST}:${RABBITMQ_PORT}"
   queue: "calendar_events"
-  username: "rabbit"
-  password: "password"
+  username: "${RABBITMQ_USER}"
+  password: "${RABBITMQ_PASS}"

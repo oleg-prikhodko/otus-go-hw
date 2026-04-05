@@ -2,7 +2,7 @@ logger:
   level: "INFO"
 
 rabbitmq:
-  addr: "rabbitmq:5672"
+  addr: "${RABBITMQ_HOST}:${RABBITMQ_PORT}"
   queue: "calendar_events"
-  username: "rabbit"
-  password: "password"
+  username: "${RABBITMQ_USER}"
+  password: "${RABBITMQ_PASS}"
