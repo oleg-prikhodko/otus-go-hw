@@ -48,7 +48,9 @@ services:
   calendar:
     build:
       context: ..
-      dockerfile: build/Dockerfile.calendar
+      dockerfile: build/Dockerfile.app
+      args:
+        SERVICE_NAME: calendar
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -65,12 +67,14 @@ services:
       CALENDAR_HTTP_PORT: ${CALENDAR_HTTP_PORT}
       CALENDAR_GRPC_PORT: ${CALENDAR_GRPC_PORT}
     volumes:
-      - ./config.calendar.yaml:/etc/calendar/config.yaml
+      - ./config.yaml:/run/config.yaml:ro
 
   scheduler:
     build:
       context: ..
-      dockerfile: build/Dockerfile.scheduler
+      dockerfile: build/Dockerfile.app
+      args:
+        SERVICE_NAME: scheduler
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -90,13 +94,14 @@ services:
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
       SCHEDULER_INTERVAL: "5s"
     volumes:
-      - ./config.scheduler.yaml:/run/config.yaml:ro
-    command: ["/app/scheduler", "-config", "/tmp/config.yaml"]
+      - ./config.yaml:/run/config.yaml:ro
 
   sender:
     build:
       context: ..
-      dockerfile: build/Dockerfile.sender
+      dockerfile: build/Dockerfile.app
+      args:
+        SERVICE_NAME: sender
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -107,8 +112,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
     volumes:
-      - ./config.sender.yaml:/run/config.yaml:ro
-    command: ["/app/sender", "-config", "/tmp/config.yaml"]
+      - ./config.yaml:/run/config.yaml:ro
 
   tests:
     build:

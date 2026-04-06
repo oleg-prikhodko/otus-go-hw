@@ -1,8 +1,0 @@
-logger:
-  level: "INFO"
-
-rabbitmq:
-  addr: "${RABBITMQ_HOST}:${RABBITMQ_PORT}"
-  queue: "${RABBITMQ_QUEUE}"
-  username: "${RABBITMQ_USER}"
-  password: "${RABBITMQ_PASS}"
