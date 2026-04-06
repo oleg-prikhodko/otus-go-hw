@@ -77,16 +77,16 @@ generate:
 	go generate ./internal/server/grpc/...
 
 up:
-	docker compose -f deployments/docker-compose.yaml up -d
+	docker compose -f ./deployments/docker-compose.yaml --env-file ./deployments/.env.example up -d
 
 down:
-	docker compose -f deployments/docker-compose.yaml down
+	docker compose -f ./deployments/docker-compose.yaml --env-file ./deployments/.env.example down
 
 integration-tests:
-	@docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test up -d calendar scheduler sender; \
-    	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test run --rm --build tests; \
+	@docker compose -f ./deployments/docker-compose.tests.yaml --env-file ./deployments/.env.test.example up -d calendar scheduler sender; \
+    	docker compose -f ./deployments/docker-compose.tests.yaml --env-file ./deployments/.env.test.example run --rm tests; \
     	status=$$?; \
-    	docker compose -f deployments/docker-compose.tests.yaml --env-file deployments/.env.test down; \
+    	docker compose -f ./deployments/docker-compose.tests.yaml --env-file ./deployments/.env.test.example down; \
     	exit $$status
 
 .PHONY: build run build-img run-img version test test-integration lint migrate-up migrate-down generate up down integration-tests
