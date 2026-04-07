@@ -44,6 +44,17 @@ func (a *App) ListEventsForMonth(start time.Time) ([]storage.Event, error) {
 	return a.storage.List(start, end)
 }
 
+func (a *App) ListForNotification() ([]storage.Event, error) {
+	start := time.Now()
+	end := start.Add(time.Minute)
+	return a.storage.ListForNotification(start, end)
+}
+
+func (a *App) DeleteOutdated() error {
+	olderThan := time.Now().AddDate(-1, 0, 0)
+	return a.storage.DeleteOutdated(olderThan)
+}
+
 func getWeekBounds(t time.Time) (start, end time.Time) {
 	weekday := int(t.Weekday())
 	if weekday == 0 {

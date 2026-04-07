@@ -42,6 +42,14 @@ type MockApp struct {
 	ListMonthErr    error
 }
 
+func (m *MockApp) ListForNotification() ([]storage.Event, error) {
+	panic("implement me")
+}
+
+func (m *MockApp) DeleteOutdated() error {
+	panic("implement me")
+}
+
 func (m *MockApp) CreateEvent(ev storage.Event) error {
 	m.EventCreateCalled = true
 	m.EventCreate = ev

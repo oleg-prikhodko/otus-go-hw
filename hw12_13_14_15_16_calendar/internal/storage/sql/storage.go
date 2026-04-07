@@ -126,3 +126,35 @@ func (s *Storage) List(from, to time.Time) ([]storage.Event, error) {
 
 	return events, nil
 }
+
+func (s *Storage) ListForNotification(from time.Time, to time.Time) ([]storage.Event, error) {
+	if s.db == nil {
+		return nil, ErrNotConnected
+	}
+
+	query := `
+		SELECT id, title, event_time, duration, description, owner_id, notify_before
+		FROM events
+		WHERE event_time - ( COALESCE( notify_before, 0 ) / 1000 ) * interval '1 microsecond' BETWEEN $1 AND $2;`
+
+	events := make([]storage.Event, 0)
+	err := s.db.Select(&events, query, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list events: %w", err)
+	}
+
+	return events, nil
+}
+
+func (s *Storage) DeleteOutdated(olderThan time.Time) error {
+	if s.db == nil {
+		return ErrNotConnected
+	}
+
+	_, err := s.db.Exec("DELETE FROM events WHERE event_time < $1;", olderThan)
+	if err != nil {
+		return fmt.Errorf("failed to delete outdated events: %w", err)
+	}
+
+	return nil
+}

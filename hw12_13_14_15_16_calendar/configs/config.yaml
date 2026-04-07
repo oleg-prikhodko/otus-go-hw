@@ -9,3 +9,9 @@ grpc:
 
 storage:
   type: "MEMORY"
+
+rabbitmq:
+  addr: "localhost:5672"
+  queue: "calendar_events"
+  username: "guest"
+  password: "guest"
