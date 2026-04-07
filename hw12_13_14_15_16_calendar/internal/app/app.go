@@ -17,9 +17,13 @@ func New(logger common.Logger, storage storage.EventStorage) *App {
 	return &App{logger, storage}
 }
 
-func (a *App) CreateEvent(ev storage.Event) error {
+func (a *App) CreateEvent(ev storage.Event) (string, error) {
 	ev.ID = uuid.New().String()
-	return a.storage.Create(ev)
+	err := a.storage.Create(ev)
+	if err != nil {
+		return "", err
+	}
+	return ev.ID, nil
 }
 
 func (a *App) UpdateEvent(ev storage.Event) error {

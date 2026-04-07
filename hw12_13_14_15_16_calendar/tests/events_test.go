@@ -128,16 +128,7 @@ func createTestEvent(t *testing.T, title string, eventTime time.Time) string {
 		}
 	}
 
-	if result.ID != "" {
-		return result.ID
-	}
-
-	var id string
-	err = db.QueryRow("SELECT id FROM events WHERE title = $1", title).Scan(&id)
-	if err != nil {
-		t.Fatalf("failed to get event id from db: %v", err)
-	}
-	return id
+	return result.ID
 }
 
 func TestListDayEvents_Success(t *testing.T) {

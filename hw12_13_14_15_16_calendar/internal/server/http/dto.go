@@ -67,3 +67,7 @@ type ListEventsResponse struct {
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
+
+type CreateEventResponse struct {
+	ID string `json:"id"`
+}

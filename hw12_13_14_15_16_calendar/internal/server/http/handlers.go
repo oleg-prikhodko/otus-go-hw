@@ -27,12 +27,13 @@ func handleCreateEvent(app common.Application) http.HandlerFunc {
 			NotifyBefore: durationPtr(req.NotifyBefore),
 		}
 
-		if err := app.CreateEvent(ev); err != nil {
+		id, err := app.CreateEvent(ev)
+		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		w.WriteHeader(http.StatusCreated)
+		writeJSON(w, http.StatusCreated, CreateEventResponse{ID: id})
 	}
 }
 

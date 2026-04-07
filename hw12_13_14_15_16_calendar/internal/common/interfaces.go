@@ -12,7 +12,7 @@ type Logger interface {
 }
 
 type Application interface {
-	CreateEvent(ev storage.Event) error
+	CreateEvent(ev storage.Event) (string, error)
 	UpdateEvent(ev storage.Event) error
 	DeleteEvent(id string) error
 	ListEventsForDay(date time.Time) ([]storage.Event, error)
