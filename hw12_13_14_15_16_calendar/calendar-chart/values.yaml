@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: calendar-app
+  tag: latest
+  pullPolicy: IfNotPresent
+
+apps:
+  calendar:
+    name: calendar
+    image: calendar-app
+    ports:
+      http: 8080
+      grpc: 9090
+    config:
+      logger:
+        level: INFO
+      server:
+        addr: ":8080"
+      grpc:
+        addr: ":9090"
+      storage:
+        type: MEMORY
+      rabbitmq:
+        addr: "rabbitmq:5672"
+        queue: "calendar"
+        username: "guest"
+        password: "guest"
+      scheduler:
+        interval: 1m
+  scheduler:
+    name: scheduler
+    image: scheduler-app
+    config:
+      logger:
+        level: INFO
+      storage:
+        type: MEMORY
+      rabbitmq:
+        addr: "rabbitmq:5672"
+        queue: "calendar"
+        username: "guest"
+        password: "guest"
+      scheduler:
+        interval: 1m
+  sender:
+    name: sender
+    image: sender-app
+    config:
+      logger:
+        level: INFO
+      rabbitmq:
+        addr: "rabbitmq:5672"
+        queue: "calendar"
+        username: "guest"
+        password: "guest"
+
+rabbitmq:
+  enabled: true
+  image:
+    repository: rabbitmq
+    tag: 3-management
+  port: 5672
+  managementPort: 15672
+  username: guest
+  password: guest
+
+ingress:
+  enabled: true
+  host: localhost
+  httpPort: 8080
+  grpcPort: 9090
