@@ -1,0 +1,12 @@
+{{- range .Values.apps }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .name }}-config
+  labels:
+    {{- include "calendar.labels" $ | nindent 4 }}
+data:
+  config.yaml: |
+    {{- toYaml .config | nindent 4 }}
+{{- end }}

@@ -1,0 +1,25 @@
+{{- range .Values.apps }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+spec:
+  type: ClusterIP
+  {{- if eq .name "scheduler" }}
+  clusterIP: None
+  {{- else if eq .name "sender" }}
+  clusterIP: None
+  {{- end }}
+  selector:
+    app: {{ .name }}
+  {{- if .ports }}
+  ports:
+    {{- range $name, $port := .ports }}
+    - name: {{ $name }}
+      port: {{ $port }}
+      targetPort: {{ $port }}
+      protocol: TCP
+    {{- end }}
+  {{- end }}
+{{- end }}
