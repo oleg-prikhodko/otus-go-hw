@@ -50,10 +50,10 @@ func (m *MockApp) DeleteOutdated() error {
 	panic("implement me")
 }
 
-func (m *MockApp) CreateEvent(ev storage.Event) error {
+func (m *MockApp) CreateEvent(ev storage.Event) (string, error) {
 	m.EventCreateCalled = true
 	m.EventCreate = ev
-	return m.EventCreateErr
+	return ev.ID, m.EventCreateErr
 }
 
 func (m *MockApp) UpdateEvent(ev storage.Event) error {
