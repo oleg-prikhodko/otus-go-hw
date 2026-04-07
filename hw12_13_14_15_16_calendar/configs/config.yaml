@@ -15,3 +15,6 @@ rabbitmq:
   queue: "calendar_events"
   username: "guest"
   password: "guest"
+
+scheduler:
+  interval: "1m"

@@ -1,0 +1,21 @@
+logger:
+  level: "INFO"
+
+server:
+  addr: "0.0.0.0:8080"
+
+grpc:
+  addr: "0.0.0.0:9090"
+
+storage:
+  type: SQL
+  addr: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}"
+
+rabbitmq:
+  addr: "${RABBITMQ_HOST}:${RABBITMQ_PORT}"
+  queue: "${RABBITMQ_QUEUE}"
+  username: "${RABBITMQ_USER}"
+  password: "${RABBITMQ_PASS}"
+
+scheduler:
+  interval: "${SCHEDULER_INTERVAL}"

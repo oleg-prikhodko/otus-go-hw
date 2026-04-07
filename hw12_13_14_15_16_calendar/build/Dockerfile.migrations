@@ -1,0 +1,9 @@
+FROM golang:1.23
+
+RUN go install github.com/pressly/goose/v3/cmd/goose@v3.18.0
+
+WORKDIR /migrations
+
+COPY migrations/ ./migrations/
+
+ENTRYPOINT ["goose"]

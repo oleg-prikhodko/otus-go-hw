@@ -1,4 +1,4 @@
-name: calendar
+name: calendar-tests
 
 services:
   db:
@@ -11,27 +11,10 @@ services:
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -p ${POSTGRES_PORT} -U ${POSTGRES_USER}"]
       interval: 5s
-      timeout: 5s
-      retries: 5
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-      RABBITMQ_AMQP_TCP_PORT: ${RABBITMQ_PORT}
-    ports:
-      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
       timeout: 5s
       retries: 5
 
@@ -42,9 +25,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    entrypoint: ["sh", "-c", "sleep 2 && goose -dir /migrations postgres \"postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}\" up"]
+    entrypoint: ["sh", "-c", "sleep 2 && goose -dir /migrations postgres \"postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}\" up"]
     volumes:
       - ../migrations:/migrations
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_AMQP_TCP_PORT: ${RABBITMQ_PORT}
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+    volumes:
+      - rabbitmq_test_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   calendar:
     build:
@@ -65,11 +64,6 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_SSLMODE: ${POSTGRES_SSLMODE}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
       CALENDAR_HTTP_PORT: ${CALENDAR_HTTP_PORT}
       CALENDAR_GRPC_PORT: ${CALENDAR_GRPC_PORT}
     volumes:
@@ -82,8 +76,8 @@ services:
       args:
         SERVICE_NAME: scheduler
     depends_on:
-      db:
-        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     environment:
@@ -98,7 +92,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
-      SCHEDULER_INTERVAL: "1m"
+      SCHEDULER_INTERVAL: "5s"
     volumes:
       - ./config.yaml:/run/config.yaml:ro
 
@@ -120,6 +114,24 @@ services:
     volumes:
       - ./config.yaml:/run/config.yaml:ro
 
+  tests:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.tests
+    depends_on:
+      calendar:
+        condition: service_started
+      scheduler:
+        condition: service_started
+      sender:
+        condition: service_started
+    environment:
+      DB_CONN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSLMODE}"
+      CALENDAR_HOST: calendar
+      CALENDAR_HTTP_PORT: ${CALENDAR_HTTP_PORT}
+      CALENDAR_GRPC_PORT: ${CALENDAR_GRPC_PORT}
+      RABBITMQ_URL: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:${RABBITMQ_PORT}/"
+
 volumes:
-  postgres_data:
-  rabbitmq_data:
+  postgres_test_data:
+  rabbitmq_test_data:

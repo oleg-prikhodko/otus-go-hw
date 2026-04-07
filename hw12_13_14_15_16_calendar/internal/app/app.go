@@ -3,6 +3,7 @@ package app
 import (
 	"time"
 
+	"github.com/google/uuid"                                                       //nolint:depguard
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/common"  //nolint:depguard
 	"github.com/oleg-prikhodko/otus-go-hw/hw12_13_14_15_calendar/internal/storage" //nolint:depguard
 )
@@ -16,8 +17,13 @@ func New(logger common.Logger, storage storage.EventStorage) *App {
 	return &App{logger, storage}
 }
 
-func (a *App) CreateEvent(ev storage.Event) error {
-	return a.storage.Create(ev)
+func (a *App) CreateEvent(ev storage.Event) (string, error) {
+	ev.ID = uuid.New().String()
+	err := a.storage.Create(ev)
+	if err != nil {
+		return "", err
+	}
+	return ev.ID, nil
 }
 
 func (a *App) UpdateEvent(ev storage.Event) error {

@@ -68,11 +68,12 @@ func (s *Server) CreateEvent(_ context.Context, req *pb.CreateEventRequest) (*pb
 		NotifyBefore: parseProtoDuration(req.NotifyBefore),
 	}
 
-	if err := s.app.CreateEvent(ev); err != nil {
+	id, err := s.app.CreateEvent(ev)
+	if err != nil {
 		return nil, err
 	}
 
-	return &pb.CreateEventResponse{Id: ev.ID}, nil
+	return &pb.CreateEventResponse{Id: id}, nil
 }
 
 func (s *Server) UpdateEvent(_ context.Context, req *pb.UpdateEventRequest) (*pb.UpdateEventResponse, error) {
